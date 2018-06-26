@@ -41,10 +41,10 @@ std::vector<std::tuple<Team*, Team*>> list_remaining(const graph_ty& g, teams_li
                   int sum_a = std::get<0>(a)->count<Team::PLAY>() + std::get<1>(a)->count<Team::PLAY>();
                   int sum_b = std::get<0>(b)->count<Team::PLAY>() + std::get<1>(b)->count<Team::PLAY>();
                   if (sum_a != sum_b)
-                      return sum_a > sum_b;
+                      return sum_a < sum_b;
                   sum_a = std::get<0>(a)->count<Team::SLEEP>() + std::get<1>(a)->count<Team::SLEEP>();
                   sum_b = std::get<0>(b)->count<Team::SLEEP>() + std::get<1>(b)->count<Team::SLEEP>();
-                  return sum_a < sum_b;
+                  return sum_a > sum_b;
               });
     return res;
 };
@@ -121,7 +121,7 @@ void gen_round(match_list& buf, graph_ty& graph, std::vector<Team*>& teams, team
                   int sum_b = b->count<Team::JUDGE>();
                   if (sum_a != sum_b)
                       return sum_a < sum_b;
-                  return a->count<Team::SLEEP>() < b->count<Team::SLEEP>();
+                  return a->count<Team::SLEEP>() > b->count<Team::SLEEP>();
               });
 
     for (auto i = 0; i < max; ++i)

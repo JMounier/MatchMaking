@@ -16,9 +16,6 @@ int main(int argc, char** argv) {
     int nb_team = std::atoi(argv[1]);
     int nb_field = std::atoi(argv[2]);
 
-    std::cerr << argv[1] << "=" << nb_team << std::endl;
-    std::cerr << argv[2] << "=" << nb_field << std::endl;
-
     if (nb_field < 1 || nb_team < 3)
         error_msg(argv[0],"invalid value\n");
 
