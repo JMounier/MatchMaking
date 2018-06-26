@@ -1,0 +1,25 @@
+./MatchMaking 6 2
+matches:
+ROUND N°0
+terrain: 0,"arbitre":2,"equipes":[0,1]
+terrain: 1,"arbitre":5,"equipes":[3,4]
+ROUND N°1
+terrain: 0,"arbitre":0,"equipes":[2,5]
+terrain: 1,"arbitre":4,"equipes":[1,3]
+ROUND N°2
+terrain: 0,"arbitre":1,"equipes":[0,2]
+terrain: 1,"arbitre":3,"equipes":[4,5]
+ROUND N°3
+terrain: 0,"arbitre":3,"equipes":[1,2]
+terrain: 1,"arbitre":5,"equipes":[0,4]
+ROUND N°4
+terrain: 0,"arbitre":1,"equipes":[3,5]
+terrain: 1,"arbitre":0,"equipes":[2,4]
+ROUND N°5
+terrain: 0,"arbitre":4,"equipes":[0,3]
+terrain: 1,"arbitre":2,"equipes":[1,5]
+ROUND N°6
+terrain: 0,"arbitre":4,"equipes":[2,3]
+terrain: 1,"arbitre":1,"equipes":[0,5]
+ROUND N°7
+terrain: 0,"arbitre":2,"equipes":[1,4]
