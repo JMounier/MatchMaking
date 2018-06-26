@@ -1,6 +1,7 @@
 #include "match.hh"
 
 #include <algorithm>
+#include <string>
 
 bool done(const graph_ty& g)
 {
@@ -34,15 +35,15 @@ std::vector<std::tuple<Team*, Team*>> list_remaining(const graph_ty& g, teams_li
             if (!g[i][j])
                 res.push_back(std::make_tuple(&teams[j], &teams[i]));
 
-    std::sort(possible.begin(), possible.end(),
+    std::sort(res.begin(), res.end(),
               [](const std::tuple<Team*,Team*>& a, const std::tuple<Team*,Team*>& b)
               {
-                  int sum_a = a.get<0>()->count<Team::PLAY>() + a.get<1>()->count<Team::PLAY>();
-                  int sum_b = b.get<0>()->count<Team::PLAY>() + b.get<1>()->count<Team::PLAY>();
+                  int sum_a = std::get<0>(a)->count<Team::PLAY>() + std::get<1>(a)->count<Team::PLAY>();
+                  int sum_b = std::get<0>(b)->count<Team::PLAY>() + std::get<1>(b)->count<Team::PLAY>();
                   if (sum_a != sum_b)
                       return sum_a > sum_b;
-                  sum_a = a.get<0>()->count<Team::SLEEP>() + a.get<1>()->count<Team::SLEEP>();
-                  sum_b = b.get<0>()->count<Team::SLEEP>() + b.get<1>()->count<Team::SLEEP>();
+                  sum_a = std::get<0>(a)->count<Team::SLEEP>() + std::get<1>(a)->count<Team::SLEEP>();
+                  sum_b = std::get<0>(b)->count<Team::SLEEP>() + std::get<1>(b)->count<Team::SLEEP>();
                   return sum_a < sum_b;
               });
     return res;
@@ -55,7 +56,7 @@ graph_ty gen_matches(int nb_team)
     {
         res.emplace_back();
         for (auto j = 0; j < nb_team; j++)
-            res.back.emplace_back(j == i);
+            res.back().emplace_back(j == i);
     }
     return res;
 }
@@ -66,6 +67,15 @@ teams_list gen_teams(int nb_team)
     for (auto i = 0; i < nb_team; i++)
         res.push_back(Team(i));
     return res;
+}
+
+std::vector<Team*> clone(teams_list& teams)
+{
+  std::vector<Team*> res;
+  for (auto& elm : teams)
+    res.push_back(&elm);
+
+  return res;
 }
 
 match_list make_match(int nb_team, int nb_field)
@@ -80,7 +90,7 @@ match_list make_match(int nb_team, int nb_field)
 
     while (!done(graph))
     {
-        gen_round(res, graph, teams_cln, nb_field);
+        gen_round(res, graph, teams_cln, teams, nb_field);
         nb_round++;
         apply_sleep(teams, nb_round);
     }
@@ -95,12 +105,12 @@ void apply_sleep(teams_list& teams, int num)
             elm.push(Team::SLEEP);
 }
 
-void gen_round(match_list& buf, graph_ty& graph, std::vector<Team*>& teams, int nb_field)
+void gen_round(match_list& buf, graph_ty& graph, std::vector<Team*>& teams, teams_list& teams_stat, int nb_field)
 {
-    const nb_match = graph.size() * graph.size() - graph.size();
+    const int nb_match = graph.size() * (graph.size() - 1) / 2;
     int max = count_left(graph, nb_field);
 
-    auto possible = list_remaining(g);
+    auto possible = list_remaining(graph, teams_stat);
 
     match_tup selected;
 
@@ -119,14 +129,14 @@ void gen_round(match_list& buf, graph_ty& graph, std::vector<Team*>& teams, int 
         bool found = false;
 
         for (auto it = possible.begin(); it != possible.end(); ++it)
-            if (compatible(selected, it->get<0>()) && compatible(selected, it->get<1>()))
+            if (compatible(selected, std::get<0>(*it)) && compatible(selected, std::get<1>(*it)))
             {
                 auto judge = find_judge(selected, *it, teams, nb_match);
                 if (!judge)
                     continue;
                 found = true;
-                selected.push_back(std::make_tuple<>(judge, it->get<0>(), it->get<1>()));
-                possible.erase(possible.being(), it + 1);
+                selected.push_back(std::make_tuple<>(judge, std::get<0>(*it), std::get<1>(*it)));
+                possible.erase(possible.begin(), it + 1);
                 break;
             }
 
@@ -145,16 +155,16 @@ void apply_selection(match_list& buf, graph_ty& graph, match_tup& selected)
     int field = 0;
     for(const auto& elm : selected)
     {
-        int j = elm.get<0>()->id;
-        int t1 = elm.get<1>()->id;
-        int t2 = elm.get<2>()->id;
+        int j = std::get<0>(elm)->id;
+        int t1 = std::get<1>(elm)->id;
+        int t2 = std::get<2>(elm)->id;
         buf.push_back(std::make_tuple<>(field++, j, t1, t2));
 
         graph[t1][t2] = true;
         graph[t2][t1] = true;
-        elm.get<0>()->push(Team::JUDGE);
-        elm.get<1>()->push(Team::PLAY);
-        elm.get<2>()->push(Team::PLAY);
+        std::get<0>(elm)->push(Team::JUDGE);
+        std::get<1>(elm)->push(Team::PLAY);
+        std::get<2>(elm)->push(Team::PLAY);
     }
 }
 
@@ -164,7 +174,7 @@ Team* find_judge(const match_tup& selected, const std::tuple<Team*, Team*>& matc
     int max = nb_match / teams.size() + 1;
 
     for (auto elm : teams)
-        if (elm->count<Team::JUDGE>() < max && match.get<0>() != elm && match.get<1>() != elm)
+        if (elm->count<Team::JUDGE>() < max && std::get<0>(match) != elm && std::get<1>(match) != elm)
             if (compatible(selected, elm))
                 return elm;
 
@@ -173,30 +183,30 @@ Team* find_judge(const match_tup& selected, const std::tuple<Team*, Team*>& matc
 
 bool compatible(const match_tup& selected,const Team* team)
 {
-    return std::any_of(selected.cbegin(), selected.cend(),
+    return !std::any_of(selected.cbegin(), selected.cend(),
                        [&team](const std::tuple<Team*, Team*, Team*> elm)
                        {
-                           return elm.get<0>() == team || elm.get<1>() == team || elm.get<2>() == team;
+                           return std::get<0>(elm) == team || std::get<1>(elm) == team || std::get<2>(elm) == team;
                        });
 }
 
-std::ostream& operator<<(std::ostream&, const match_list&)
+std::ostream& operator<<(std::ostream& out, const match_list& list)
 {
     out << "matches:" << std::endl;
-    int last = -1;
+    int last = 1;
     int round = 0;
     for (auto it = list.cbegin(); it != list.cend(); it++)
     {
-        if (it->get<0>() <= last)
+        if (std::get<0>(*it) <= last)
         {
             out << "ROUND N°" << round << std::endl;
             round++;
         }
-        last = it->get<0>();
+        last = std::get<0>(*it);
         out << "terrain: " << last;
-        out << ",\"arbitre\":" << it->get<1>();
+        out << ",\"arbitre\":" << std::get<1>(*it);
         out <<",\"equipes\":";
-        out << "[" << it->get<2>() << "," << it->get<3>() << "]" << std::endl;
+        out << "[" << std::get<2>(*it) << "," << std::get<3>(*it) << "]" << std::endl;
     }
 }
 void dump(std::ostream& out, const match_list& list)
@@ -206,11 +216,11 @@ void dump(std::ostream& out, const match_list& list)
     {
         if (it != list.cbegin())
             out << ',';
-        out << "{\"terrain\":" << it->get<0>();
-        out << ",\"arbitre\":" << it->get<1>();
+        out << "{\"terrain\":" << std::get<0>(*it);
+        out << ",\"arbitre\":" << std::get<1>(*it);
         out <<",\"equipes\":";
-        out << "[" << it->get<2>() << "," << it->get<3>() << "]}";
+        out << "[" << std::get<2>(*it) << "," << std::get<3>(*it) << "]}";
     }
 
-    return out << "]}";
+    out << "]}";
 }

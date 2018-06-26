@@ -2,13 +2,15 @@
 
 #include "structures.hh"
 
+#include <ostream>
+
 match_list make_match(int, int);
 graph_ty gen_matches(int nb_team);
 teams_list gen_teams(int nb_team);
-void gen_round(match_list& buf, graph_ty& graph, teams_list& teams, int nb_field);
-int count_left(const graph_ty& g, int max);
+void gen_round(match_list&, graph_ty&, std::vector<Team*>&, teams_list&, int nb_field);
+int count_left(const graph_ty&, int);
 bool done(const graph_ty&);
-std::vector<std::tuple<Team*, Team*>> list_remaining(const graph_ty& g, teams_list& teams);
+std::vector<std::tuple<Team*, Team*>> list_remaining(const graph_ty&, teams_list&);
 Team* find_judge(const match_tup&, const std::tuple<Team*, Team*>&,
         std::vector<Team*>&, int);
 bool compatible(const match_tup&,const Team*);

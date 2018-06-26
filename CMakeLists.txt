@@ -2,8 +2,8 @@
 project(MatchMaking)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXXFLAGS "-Wall -Wextra -Werror")
+set(CMAKE_CXXFLAGS "-Wall -Wextra -Werror -std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE  "-O3")
 
-add_executable(MatchMaking src/main.cc src/match.cc src/match.hh, src/structures.hh)
+add_executable(MatchMaking src/main.cc src/match.cc src/match.hh src/structures.hh)
