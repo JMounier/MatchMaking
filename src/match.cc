@@ -208,6 +208,7 @@ std::ostream& operator<<(std::ostream& out, const match_list& list)
         out <<",\"equipes\":";
         out << "[" << std::get<2>(*it) << "," << std::get<3>(*it) << "]" << std::endl;
     }
+    return out;
 }
 void dump(std::ostream& out, const match_list& list)
 {
