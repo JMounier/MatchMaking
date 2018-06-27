@@ -2,7 +2,7 @@
 project(MatchMaking)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXXFLAGS "-Wall -Wextra -Werror -std=c++17")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE  "-O3")
 
